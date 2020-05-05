@@ -34,7 +34,7 @@ public class PlayerMoveResponse
 
 public class GetMoveOptionsResponse
 {
-    // curl -X POST --header "Content-Type: application/json" -d '{"game_id":"5eb057373c58dc0014d75b89","from":"b7","to":"b5"}' 'http://chess-api-chess.herokuapp.com/api/v1/chess/one/move/player'
+    // curl -X POST --header "Content-Type: application/json" -d '{"game_id":"5eb057373c58dc0014d75b89","position":"b7"}' 'http://chess-api-chess.herokuapp.com/api/v1/chess/one/moves'
     public string _id { get; set; }
     public List<string> moves { get; set; }
 }
@@ -85,6 +85,7 @@ public class ChessAPI
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
         string jsonResponse = reader.ReadToEnd();
+        Debug.Log(jsonResponse);
         using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonResponse)))
         {
             // Deserialization from JSON  
@@ -96,30 +97,28 @@ public class ChessAPI
         };
     }
 
-    public PlayerMoveResponse PlayerMove(string from, string to)
+    public PlayerMoveResponse PlayerMove(string fromPosition, string toPosition)
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL+"/move/player");
         request.Method = "POST";
 
-        byte[] byte1 = encoding.GetBytes("game_id=" + game_id);
-        byte[] byte2 = encoding.GetBytes("from=" + from);
-        byte[] byte3 = encoding.GetBytes("to=" + to);
+        byte[] byte1 = encoding.GetBytes("game_id=" + game_id + "&from=" + fromPosition + "&to=" + toPosition);
 
         // Set the content type of the data being posted.
         request.ContentType = "application/x-www-form-urlencoded";
 
         // Set the content length of the string being posted.
-        request.ContentLength = byte1.Length + byte2.Length + byte3.Length;
+        request.ContentLength = byte1.Length;
         Stream newStream = request.GetRequestStream();
 
         newStream.Write(byte1, 0, byte1.Length);
-        newStream.Write(byte2, 0, byte2.Length);
-        newStream.Write(byte3, 0, byte3.Length);
+
         newStream.Close();
 
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
         string jsonResponse = reader.ReadToEnd();
+        Debug.Log(jsonResponse);
         using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonResponse)))
         {
             // Deserialization from JSON  
@@ -130,34 +129,33 @@ public class ChessAPI
         };
     }
 
-    public GetMoveOptionsResponse GetMoveOptions(string from)
+    public GetMoveOptionsResponse GetMoveOptions(string fromPosition)
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL + "/moves");
         request.Method = "POST";
-
-        byte[] byte1 = encoding.GetBytes("game_id=" + game_id);
-        byte[] byte2 = encoding.GetBytes("position=" + from);
+        byte[] byte1 = encoding.GetBytes("game_id=" + game_id +"&position=" + fromPosition);
 
         // Set the content type of the data being posted.
         request.ContentType = "application/x-www-form-urlencoded";
 
         // Set the content length of the string being posted.
-        request.ContentLength = byte1.Length + byte2.Length;
+        request.ContentLength = byte1.Length;
         Stream newStream = request.GetRequestStream();
 
         newStream.Write(byte1, 0, byte1.Length);
-        newStream.Write(byte2, 0, byte2.Length);
         newStream.Close();
 
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
         string jsonResponse = reader.ReadToEnd();
+        Debug.Log(jsonResponse);
         using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonResponse)))
         {
             // Deserialization from JSON  
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(GetMoveOptionsResponse));
             // TODO: status validation
             GetMoveOptionsResponse info = (GetMoveOptionsResponse)deserializer.ReadObject(ms);
+            Debug.Log(info);
             return info;
         };
     }

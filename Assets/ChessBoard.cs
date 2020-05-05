@@ -12,7 +12,7 @@ public class ChessBoard : MonoBehaviour
     public List<MoveLog> MovesLog;
     public List<Piece> WhitePieces;
     public List<Piece> BlackPieces;
-    private ChessAPI ChessAPI = new ChessAPI();
+    private ChessAPI ChessAPI;
     private Dictionary<(string, int), ChessSquare> Squares = new Dictionary<(string, int), ChessSquare>();
     private bool IsWhiteTurn = true;
     public bool IsPlayerWhite = true;
@@ -20,12 +20,12 @@ public class ChessBoard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        ChessAPI = new ChessAPI();
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
             ChessSquare sq = child.gameObject.GetComponent<ChessSquare>();
             if (sq != null)
             {
-                Debug.Log("Getting square . . ."+sq.col+ sq.row);
                 Squares.Add((sq.col, sq.row), sq);
             }
         }
@@ -45,19 +45,62 @@ public class ChessBoard : MonoBehaviour
      
     }
 
+    public void PlayerMove(Piece piece, ChessSquare newPosition)
+    {
+        string fromPosition = piece.currentPosition.col + piece.currentPosition.row.ToString();
+        string toPosition = newPosition.col + newPosition.row.ToString();
+        ChessAPI.PlayerMove(fromPosition, toPosition);
+        piece.Move(newPosition);
+        IsWhiteTurn = !IsWhiteTurn;
+        piece.MoveOptions = getMoveOptions(piece);
+    }
+
+    private void AIMove()
+    {
+        AIMoveResponse aIMoveResponse = ChessAPI.AiMove();
+        Piece piece = GetPieceFromSquare(false, aIMoveResponse.from);
+        piece.Move(Squares[(aIMoveResponse.to[0].ToString(), Int32.Parse(aIMoveResponse.to[1].ToString()))]);
+        IsWhiteTurn = !IsWhiteTurn;
+    }
+
+    private Piece GetPieceFromSquare(bool isPlayerPiece, string position)
+    {
+        ChessSquare positionSquare = Squares[(position[0].ToString(), Int32.Parse(position[1].ToString()))];
+        if ((isPlayerPiece && IsPlayerWhite) || (!isPlayerPiece && !IsPlayerWhite)) {
+            foreach (Piece piece in WhitePieces)
+            {
+                if (piece.currentPosition == positionSquare) {
+                    return piece;
+                } 
+            }
+            
+        } else {
+            foreach (Piece piece in BlackPieces)
+            {
+                if (piece.currentPosition == positionSquare)
+                {
+                    return piece;
+                }
+            }
+        }
+        return null;
+    }
 
     private List<ChessSquare> getMoveOptions(Piece piece)
     {
         string fromPosition = piece.currentPosition.col + piece.currentPosition.row.ToString();
         List<string> moveOptions = ChessAPI.GetMoveOptions(fromPosition).moves;
-        Debug.Log(fromPosition);
-        Debug.Log(moveOptions);
-        var moveOptionSquares = from x in moveOptions select Squares[(x[0].ToString(),(int)x[1])];
-        return (List<ChessSquare>)moveOptionSquares;
+        List<ChessSquare> moveOptionSquares = new List<ChessSquare>();
+        foreach (string option in moveOptions)
+        {
+            var key = (option[0].ToString(), Int32.Parse(option[1].ToString()));
+            moveOptionSquares.Add(Squares[key]);
+        }
+        return moveOptionSquares;
 
     }
 
-    public void determineCollision(Piece piece1, Piece piece2)
+    public void DetermineCollision(Piece piece1, Piece piece2)
     {
         bool piece1Black = BlackPieces.Contains(piece1);
         if ((IsWhiteTurn && piece1Black) || (!IsWhiteTurn && !piece1Black))
