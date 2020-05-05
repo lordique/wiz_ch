@@ -92,7 +92,7 @@ public class ChessAPI
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(AIMoveResponse));
             AIMoveResponse info = (AIMoveResponse)deserializer.ReadObject(ms);
             // TODO: status validation
-            Console.Write("Move: " + info.from + " to " + info.to);
+            Console.Write("Move AI: " + info.from + " to " + info.to);
             return info;
         };
     }
@@ -102,7 +102,9 @@ public class ChessAPI
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL+"/move/player");
         request.Method = "POST";
 
-        byte[] byte1 = encoding.GetBytes("game_id=" + game_id + "&from=" + fromPosition + "&to=" + toPosition);
+        string p = "game_id=" + game_id + "&from=" + fromPosition + "&to=" + toPosition;
+        Debug.Log(p);
+        byte[] byte1 = encoding.GetBytes(p);
 
         // Set the content type of the data being posted.
         request.ContentType = "application/x-www-form-urlencoded";
@@ -118,7 +120,7 @@ public class ChessAPI
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream());
         string jsonResponse = reader.ReadToEnd();
-        Debug.Log(jsonResponse);
+        Debug.Log("Player move: "+jsonResponse);
         using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonResponse)))
         {
             // Deserialization from JSON  
@@ -155,7 +157,6 @@ public class ChessAPI
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(GetMoveOptionsResponse));
             // TODO: status validation
             GetMoveOptionsResponse info = (GetMoveOptionsResponse)deserializer.ReadObject(ms);
-            Debug.Log(info);
             return info;
         };
     }

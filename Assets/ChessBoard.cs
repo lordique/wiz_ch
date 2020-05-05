@@ -16,6 +16,7 @@ public class ChessBoard : MonoBehaviour
     private Dictionary<(string, int), ChessSquare> Squares = new Dictionary<(string, int), ChessSquare>();
     private bool IsWhiteTurn = true;
     public bool IsPlayerWhite = true;
+    public Piece selectedPiece = null;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +27,7 @@ public class ChessBoard : MonoBehaviour
             ChessSquare sq = child.gameObject.GetComponent<ChessSquare>();
             if (sq != null)
             {
+                sq.RegisterBoard(this);
                 Squares.Add((sq.col, sq.row), sq);
             }
         }
@@ -52,6 +54,8 @@ public class ChessBoard : MonoBehaviour
         ChessAPI.PlayerMove(fromPosition, toPosition);
         piece.Move(newPosition);
         IsWhiteTurn = !IsWhiteTurn;
+        selectedPiece = null;
+        AIMove();
         piece.MoveOptions = getMoveOptions(piece);
     }
 
@@ -59,13 +63,15 @@ public class ChessBoard : MonoBehaviour
     {
         AIMoveResponse aIMoveResponse = ChessAPI.AiMove();
         Piece piece = GetPieceFromSquare(false, aIMoveResponse.from);
-        piece.Move(Squares[(aIMoveResponse.to[0].ToString(), Int32.Parse(aIMoveResponse.to[1].ToString()))]);
+        Debug.Log("Moving AI piece at " + piece.currentPosition.col + piece.currentPosition.row.ToString());
+        ChessSquare newPosition = Squares[(aIMoveResponse.to[0].ToString(), int.Parse(aIMoveResponse.to[1].ToString()))];
+        piece.Move(newPosition);
         IsWhiteTurn = !IsWhiteTurn;
     }
 
     private Piece GetPieceFromSquare(bool isPlayerPiece, string position)
     {
-        ChessSquare positionSquare = Squares[(position[0].ToString(), Int32.Parse(position[1].ToString()))];
+        ChessSquare positionSquare = Squares[(position[0].ToString(), int.Parse(position[1].ToString()))];
         if ((isPlayerPiece && IsPlayerWhite) || (!isPlayerPiece && !IsPlayerWhite)) {
             foreach (Piece piece in WhitePieces)
             {
@@ -79,6 +85,7 @@ public class ChessBoard : MonoBehaviour
             {
                 if (piece.currentPosition == positionSquare)
                 {
+
                     return piece;
                 }
             }
@@ -93,7 +100,7 @@ public class ChessBoard : MonoBehaviour
         List<ChessSquare> moveOptionSquares = new List<ChessSquare>();
         foreach (string option in moveOptions)
         {
-            var key = (option[0].ToString(), Int32.Parse(option[1].ToString()));
+            var key = (option[0].ToString(), int.Parse(option[1].ToString()));
             moveOptionSquares.Add(Squares[key]);
         }
         return moveOptionSquares;

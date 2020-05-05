@@ -10,8 +10,6 @@ public class LaserController : MonoBehaviour
 
     private SteamVR_LaserPointer laserPointer;
 
-    private List<GameObject> objects = new List<GameObject>();
-
    // private SteamVR_TrackedController trackedController;
 
         
@@ -41,7 +39,14 @@ public class LaserController : MonoBehaviour
 
     private void HandlePointerIn(object sender, PointerEventArgs e)
     {
-      objects.Add(e.target.gameObject);
+        if (e.target.gameObject.GetComponent<Piece>() != null)
+        {
+            e.target.gameObject.GetComponent<Piece>().Highlight();
+        }
+        else if (e.target.gameObject.GetComponent<ChessSquare>() != null)
+        {
+            e.target.gameObject.GetComponent<ChessSquare>().LaserHighlightIfShould();
+        }
     }
 
     private void HandlePointerClick(object sender, PointerEventArgs e)
@@ -58,7 +63,14 @@ public class LaserController : MonoBehaviour
 
     private void HandlePointerOut(object sender, PointerEventArgs e)
     {
-        objects.Remove(e.target.gameObject);
+        if (e.target.gameObject.GetComponent<Piece>() != null)
+        {
+            e.target.gameObject.GetComponent<Piece>().UnHighlight();
+        }
+        else if (e.target.gameObject.GetComponent<ChessSquare>() != null)
+        {
+            e.target.gameObject.GetComponent<ChessSquare>().LaserUnHighlightIfShould();
+        }
     }
 
 
