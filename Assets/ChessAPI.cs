@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine;
 
 
 public class InitResponse
@@ -45,9 +46,9 @@ public class ChessAPI
     private ASCIIEncoding encoding = new ASCIIEncoding();
 
     public ChessAPI() {
-        game_id = init_game();
+        game_id = InitGame();
     }
-    private string init_game()
+    private string InitGame()
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -58,13 +59,13 @@ public class ChessAPI
             // Deserialization from JSON  
             DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(InitResponse));
             InitResponse info = (InitResponse)deserializer.ReadObject(ms);
-            Console.Write("GameId: " + info.game_id);
+            Debug.Log("GameId: " + info.game_id);
             // TODO: validate status
             return info.game_id;
         };
     }
 
-    private AIMoveResponse ai_move()
+    public AIMoveResponse AiMove()
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL+"/move/ai");
         request.Method = "POST";
@@ -95,7 +96,7 @@ public class ChessAPI
         };
     }
 
-    private PlayerMoveResponse player_move(string from, string to)
+    public PlayerMoveResponse PlayerMove(string from, string to)
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL+"/move/player");
         request.Method = "POST";
@@ -129,7 +130,7 @@ public class ChessAPI
         };
     }
 
-    private GetMoveOptionsResponse get_move_options(string from)
+    public GetMoveOptionsResponse GetMoveOptions(string from)
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL + "/moves");
         request.Method = "POST";
