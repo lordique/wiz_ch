@@ -63,7 +63,6 @@ public class ChessBoard : MonoBehaviour
     {
         AIMoveResponse aIMoveResponse = ChessAPI.AiMove();
         Piece piece = GetPieceFromSquare(false, aIMoveResponse.from);
-        Debug.Log("Moving AI piece at " + piece.currentPosition.col + piece.currentPosition.row.ToString());
         ChessSquare newPosition = Squares[(aIMoveResponse.to[0].ToString(), int.Parse(aIMoveResponse.to[1].ToString()))];
         piece.Move(newPosition);
         IsWhiteTurn = !IsWhiteTurn;
