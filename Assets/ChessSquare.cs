@@ -20,8 +20,7 @@ public class ChessSquare : MonoBehaviour
     }
 
     public void Click() {
-        Debug.Log("clicked square at " + col + row.ToString());
-        if (chessBoard.selectedPiece != null && chessBoard.selectedPiece.MoveOptions.Contains(this))
+        if (chessBoard.selectedPiece != null) // TODO && chessBoard.selectedPiece.MoveOptions.Contains(this))
         {
             chessBoard.PlayerMove(chessBoard.selectedPiece, this);
         }
@@ -41,7 +40,7 @@ public class ChessSquare : MonoBehaviour
     {
         if (chessBoard.selectedPiece != null)
         {
-            if (chessBoard.selectedPiece.MoveOptions.Contains(this))
+            if (true) // TODO (chessBoard.selectedPiece.MoveOptions.Contains(this))
             {
                 Highlight(Color.blue);
             }

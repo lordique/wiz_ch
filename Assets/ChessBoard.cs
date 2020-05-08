@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class ChessBoard : MonoBehaviour
@@ -9,7 +6,6 @@ public class ChessBoard : MonoBehaviour
 
     public ChessBoard() { }
 
-    public List<MoveLog> MovesLog;
     public List<Piece> WhitePieces;
     public List<Piece> BlackPieces;
     private ChessAPI ChessAPI;
@@ -21,7 +17,7 @@ public class ChessBoard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ChessAPI = new ChessAPI();
+        ChessAPI = new ChessAPI(this);
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
             ChessSquare sq = child.gameObject.GetComponent<ChessSquare>();
@@ -51,21 +47,21 @@ public class ChessBoard : MonoBehaviour
     {
         string fromPosition = piece.currentPosition.col + piece.currentPosition.row.ToString();
         string toPosition = newPosition.col + newPosition.row.ToString();
-        ChessAPI.PlayerMove(fromPosition, toPosition);
+        ChessAPI.AddMove(fromPosition, toPosition);
+        piece.Move(newPosition);
+        IsWhiteTurn = !IsWhiteTurn;
+        piece.MoveOptions = getMoveOptions(piece);
+        ChessAPI.RequestAiMove();
+    }
+
+    public void ProcessAIMove(string fromPosition, string toPosition)
+    {
+        Debug.Log("Received move from API! " + fromPosition + toPosition);
+        Piece piece = GetPieceFromSquare(false, fromPosition);
+        ChessSquare newPosition = Squares[(toPosition[0].ToString(), int.Parse(toPosition[1].ToString()))];
         piece.Move(newPosition);
         IsWhiteTurn = !IsWhiteTurn;
         selectedPiece = null;
-        AIMove();
-        piece.MoveOptions = getMoveOptions(piece);
-    }
-
-    private void AIMove()
-    {
-        AIMoveResponse aIMoveResponse = ChessAPI.AiMove();
-        Piece piece = GetPieceFromSquare(false, aIMoveResponse.from);
-        ChessSquare newPosition = Squares[(aIMoveResponse.to[0].ToString(), int.Parse(aIMoveResponse.to[1].ToString()))];
-        piece.Move(newPosition);
-        IsWhiteTurn = !IsWhiteTurn;
     }
 
     private Piece GetPieceFromSquare(bool isPlayerPiece, string position)
@@ -94,16 +90,7 @@ public class ChessBoard : MonoBehaviour
 
     private List<ChessSquare> getMoveOptions(Piece piece)
     {
-        string fromPosition = piece.currentPosition.col + piece.currentPosition.row.ToString();
-        List<string> moveOptions = ChessAPI.GetMoveOptions(fromPosition).moves;
-        List<ChessSquare> moveOptionSquares = new List<ChessSquare>();
-        foreach (string option in moveOptions)
-        {
-            var key = (option[0].ToString(), int.Parse(option[1].ToString()));
-            moveOptionSquares.Add(Squares[key]);
-        }
-        return moveOptionSquares;
-
+        return null; //todo
     }
 
     public void DetermineCollision(Piece piece1, Piece piece2)
@@ -125,4 +112,3 @@ public class ChessBoard : MonoBehaviour
     }
 }
 
-public class MoveLog : System.Object { }

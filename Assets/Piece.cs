@@ -46,7 +46,7 @@ public class Piece : MonoBehaviour
 
     public void Highlight()
     {
-        if (chessBoard.selectedPiece == null && MoveOptions.Count > 0)
+        if (chessBoard.selectedPiece == null) // TODO && MoveOptions.Count > 0)
         {
             currentPosition.Highlight(Color.blue);
         }
@@ -54,7 +54,7 @@ public class Piece : MonoBehaviour
 
     public void UnHighlight()
     {
-        if (chessBoard.selectedPiece == null && MoveOptions.Count > 0)
+        if (chessBoard.selectedPiece == null) // TODO && MoveOptions.Count > 0)
         {
             currentPosition.UnHighlight();
         }
