@@ -13,6 +13,7 @@ public class Piece : MonoBehaviour
     public ChessBoard chessBoard;
     public List<ChessSquare> MoveOptions;
     public bool InPlay = true;
+    private bool isMoving = false;
 
     private Dictionary<string, int> DistMap = new Dictionary<string, int> {
             {"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}, {"h", 8}
@@ -32,6 +33,7 @@ public class Piece : MonoBehaviour
         desiredCoordinates = new Vector3(SquareSpacing * col_change, 0, SquareSpacing * row_change)+ desiredCoordinates;
         currentPosition.UnHighlight();
         currentPosition = newPosition;
+        isMoving = true;
     }
 
     public void Destroy()
@@ -64,22 +66,39 @@ public class Piece : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collider)
     {
-        Debug.Log("Collision");
-        Piece otherPiece = collision.gameObject.GetComponent<Piece>();
-        if (otherPiece != null)
+        Debug.Log("Trigger overlap");
+        Piece otherPiece = collider.gameObject.GetComponent<Piece>();
+        if (otherPiece != null && isMoving)
         {
-            chessBoard.DetermineCollision(otherPiece, this);
+            otherPiece.Destroy();
+        }
+    }
+
+    void OnCollisionEnter(Collision collider)
+    {
+        Debug.Log("Collision overlap");
+        Piece otherPiece = collider.gameObject.GetComponent<Piece>();
+        if (otherPiece != null && isMoving)
+        {
+            otherPiece.Destroy();
         }
     }
 
     void Update()
     {
-        if ((gameObject.transform.position - desiredCoordinates).sqrMagnitude > 0.1)
+        if (isMoving)
         {
-            Vector3 diff = desiredCoordinates - gameObject.transform.position;
-            gameObject.transform.position = speed*(new Vector3(Math.Sign(diff.x), Math.Sign(diff.y), Math.Sign(diff.z))) + gameObject.transform.position;
+            if ((gameObject.transform.position - desiredCoordinates).sqrMagnitude > 0.05)
+            {
+                Vector3 diff = desiredCoordinates - gameObject.transform.position;
+                gameObject.transform.position = speed * (new Vector3(Math.Sign(diff.x), Math.Sign(diff.y), Math.Sign(diff.z))) + gameObject.transform.position;
+            } else
+            {
+                isMoving = false;
+                chessBoard.moveNextPiece();
+            }
         }
     }
 

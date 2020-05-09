@@ -11,7 +11,7 @@ public class ChessAPI
 {
     private string stockfishPath = "C:\\Users\\lesfo\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64";
     private Process stockfishProcess;
-    private string moves = "";
+    public string moves = "";
     private string position_command = "position startpos moves ";
     private string go_command = "go";
     public AIMoveResponse AIMove = null; 

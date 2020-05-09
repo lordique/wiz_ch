@@ -11,9 +11,9 @@ public class ChessBoard : MonoBehaviour
     public List<Piece> BlackPieces;
     private ChessAPI ChessAPI;
     private Dictionary<(string, int), ChessSquare> Squares = new Dictionary<(string, int), ChessSquare>();
-    private bool IsWhiteTurn = true;
     public bool IsPlayerWhite = true;
     public Piece selectedPiece = null;
+    private Tuple<Piece, ChessSquare> moveQueue = null;
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +50,6 @@ public class ChessBoard : MonoBehaviour
         string toPosition = newPosition.col + newPosition.row.ToString();
         ChessAPI.AddMove(fromPosition, toPosition);
         piece.Move(newPosition);
-        IsWhiteTurn = !IsWhiteTurn;
         piece.MoveOptions = getMoveOptions(piece);
         ChessAPI.RequestAiMove();
     }
@@ -59,14 +58,20 @@ public class ChessBoard : MonoBehaviour
     {
         Debug.Log("Received move from API! " + fromPosition + toPosition);
         Piece piece = GetPieceFromSquare(false, fromPosition);
-        
+
         ChessSquare newPosition = Squares[(toPosition[0].ToString(), int.Parse(toPosition[1].ToString()))];
-        piece.Move(newPosition);
-               
-        IsWhiteTurn = !IsWhiteTurn;
+        moveQueue = new Tuple<Piece, ChessSquare>(piece, newPosition);
         selectedPiece = null;
-    
-       
+
+    }
+
+    public void moveNextPiece()
+    {
+        if (moveQueue != null)
+        {
+            moveQueue.Item1.Move(moveQueue.Item2);
+            moveQueue = null;
+        }
     }
 
     private Piece GetPieceFromSquare(bool isPlayerPiece, string position)
@@ -95,19 +100,6 @@ public class ChessBoard : MonoBehaviour
     private List<ChessSquare> getMoveOptions(Piece piece)
     {
         return null; //todo
-    }
-
-    public void DetermineCollision(Piece piece1, Piece piece2)
-    {
-        Debug.Log("determining collision");
-        bool piece1Black = BlackPieces.Contains(piece1);
-        if ((IsWhiteTurn && piece1Black) || (!IsWhiteTurn && !piece1Black))
-        {
-            piece1.Destroy();
-        } else {
-            piece2.Destroy();
-        }
-
     }
 
     // Update is called once per frame
