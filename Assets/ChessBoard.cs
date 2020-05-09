@@ -99,6 +99,7 @@ public class ChessBoard : MonoBehaviour
 
     public void DetermineCollision(Piece piece1, Piece piece2)
     {
+        Debug.Log("determining collision");
         bool piece1Black = BlackPieces.Contains(piece1);
         if ((IsWhiteTurn && piece1Black) || (!IsWhiteTurn && !piece1Black))
         {

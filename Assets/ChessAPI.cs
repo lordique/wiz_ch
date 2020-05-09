@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Text;
-using System.Collections.Generic;
-using UnityEngine;
 using System.Diagnostics;
 
 public class AIMoveResponse

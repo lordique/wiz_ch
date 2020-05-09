@@ -8,6 +8,8 @@ public class Piece : MonoBehaviour
 {
     public ChessSquare startingPosition;
     public ChessSquare currentPosition;
+    private Vector3 desiredCoordinates;
+    private float speed = 0.1f;
     public ChessBoard chessBoard;
     public List<ChessSquare> MoveOptions;
     public bool InPlay = true;
@@ -19,6 +21,7 @@ public class Piece : MonoBehaviour
 
     void Start()
     {
+        desiredCoordinates = gameObject.transform.position;
         chessBoard = startingPosition.GetComponentsInParent<ChessBoard>()[0];
     }
 
@@ -26,7 +29,7 @@ public class Piece : MonoBehaviour
     {
         int row_change = newPosition.row - currentPosition.row;
         int col_change = DistMap[newPosition.col] - DistMap[currentPosition.col];
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x + SquareSpacing * col_change, gameObject.transform.position.y, gameObject.transform.position.z + SquareSpacing * row_change);
+        desiredCoordinates = new Vector3(SquareSpacing * col_change, 0, SquareSpacing * row_change)+ desiredCoordinates;
         currentPosition.UnHighlight();
         currentPosition = newPosition;
     }
@@ -63,11 +66,20 @@ public class Piece : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Collision!");
+        Debug.Log("Collision");
         Piece otherPiece = collision.gameObject.GetComponent<Piece>();
         if (otherPiece != null)
         {
             chessBoard.DetermineCollision(otherPiece, this);
+        }
+    }
+
+    void Update()
+    {
+        if ((gameObject.transform.position - desiredCoordinates).sqrMagnitude > 0.1)
+        {
+            Vector3 diff = desiredCoordinates - gameObject.transform.position;
+            gameObject.transform.position = speed*(new Vector3(Math.Sign(diff.x), Math.Sign(diff.y), Math.Sign(diff.z))) + gameObject.transform.position;
         }
     }
 
