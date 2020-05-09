@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ public class Piece : MonoBehaviour
     {
         int row_change = newPosition.row - currentPosition.row;
         int col_change = DistMap[newPosition.col] - DistMap[currentPosition.col];
-        gameObject.transform.position = new Vector3(transform.position.x + SquareSpacing * col_change, transform.position.y, transform.position.z + SquareSpacing * row_change);
+        gameObject.transform.position = new Vector3(gameObject.transform.position.x + SquareSpacing * col_change, gameObject.transform.position.y, gameObject.transform.position.z + SquareSpacing * row_change);
         currentPosition.UnHighlight();
         currentPosition = newPosition;
     }

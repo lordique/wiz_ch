@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ChessBoard : MonoBehaviour
@@ -17,7 +18,7 @@ public class ChessBoard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ChessAPI = new ChessAPI(this);
+        ChessAPI = new ChessAPI();
         foreach (Transform child in GetComponentsInChildren<Transform>())
         {
             ChessSquare sq = child.gameObject.GetComponent<ChessSquare>();
@@ -58,10 +59,14 @@ public class ChessBoard : MonoBehaviour
     {
         Debug.Log("Received move from API! " + fromPosition + toPosition);
         Piece piece = GetPieceFromSquare(false, fromPosition);
+        
         ChessSquare newPosition = Squares[(toPosition[0].ToString(), int.Parse(toPosition[1].ToString()))];
         piece.Move(newPosition);
+               
         IsWhiteTurn = !IsWhiteTurn;
         selectedPiece = null;
+    
+       
     }
 
     private Piece GetPieceFromSquare(bool isPlayerPiece, string position)
@@ -80,7 +85,6 @@ public class ChessBoard : MonoBehaviour
             {
                 if (piece.currentPosition == positionSquare)
                 {
-
                     return piece;
                 }
             }
@@ -108,7 +112,11 @@ public class ChessBoard : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (ChessAPI.AIMove != null)
+        {
+            ProcessAIMove(ChessAPI.AIMove.from, ChessAPI.AIMove.to);
+            ChessAPI.AIMove = null;
+        }
     }
 }
 

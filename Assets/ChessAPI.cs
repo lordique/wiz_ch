@@ -10,19 +10,17 @@ public class AIMoveResponse
     public string to { get; set; }
 }
 
-public class ChessAPI : MonoBehaviour
+public class ChessAPI
 {
     private string stockfishPath = "C:\\Users\\lesfo\\Downloads\\stockfish-11-win\\stockfish-11-win\\Windows\\stockfish_20011801_x64";
     private Process stockfishProcess;
     private string moves = "";
     private string position_command = "position startpos moves ";
     private string go_command = "go";
-    private bool passNextOutput = false;
-    private ChessBoard chessboard;
+    public AIMoveResponse AIMove = null; 
 
-    public ChessAPI(ChessBoard chessBoard) {
+    public ChessAPI() {
          InitGame();
-         chessboard = chessBoard;
     }
 
     private void SendLine(string command)
@@ -34,7 +32,6 @@ public class ChessAPI : MonoBehaviour
     private void OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         string text = e.Data;
-        UnityEngine.Debug.Log("[UCI] " + text);
         if (text.Contains("bestmove"))
         {
             UnityEngine.Debug.Log("detected ai move!");
@@ -71,14 +68,12 @@ public class ChessAPI : MonoBehaviour
     {
         string line = position_command + moves;
         SendLine(line);
-        passNextOutput = true;
         SendLine(go_command);
 
     }
 
     public void ProcessAiMove(string engineOutput)
     {
-        passNextOutput = false;
         string[] outputSplit = engineOutput.Split(null);
         string nextMove = outputSplit[1];
         AIMoveResponse move = new AIMoveResponse();
@@ -86,7 +81,8 @@ public class ChessAPI : MonoBehaviour
         move.to = nextMove.Substring(2);
         AddMove(move.from, move.to);
         // signal move to board.
-        chessboard.ProcessAIMove(move.from, move.to);
+        AIMove = move;
+
     }
 
     public void AddMove(string fromPosition, string toPosition)
